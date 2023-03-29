@@ -29,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
 
-    dataset = SemanticKitti(args.dim_3d, args.semantic_kitti_dir, args.split,)
+    dataset = SemanticKitti(args.semantic_kitti_dir, args.split, args.dim_3d)
     loader = torch.utils.data.DataLoader(
         dataset=dataset, batch_size=1, shuffle=False, num_workers=4, drop_last=False,
     )

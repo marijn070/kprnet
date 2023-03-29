@@ -73,7 +73,7 @@ def _transorm_test(depth, refl, labels, py, px):
 
 
 class SemanticKitti(torch.utils.data.Dataset):
-    def __init__(self, dim_3d=4, dataset_dir: Path, split: str,) -> None:
+    def __init__(self, dataset_dir: Path, split: str, dim_3d=4) -> None:
         self.split = split
         self.seqs = splits[split]
         self.dataset_dir = dataset_dir
