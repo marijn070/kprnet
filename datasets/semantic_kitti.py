@@ -90,8 +90,16 @@ class SemanticKitti(torch.utils.data.Dataset):
         seq, sweep = self.sweeps[index]
         sweep_file = self.dataset_dir / seq / "velodyne" / f"{sweep}.bin"
         points = np.fromfile(sweep_file.as_posix(), dtype=np.float32)
-        points = points.reshape((-1, dim_3d))
+        
+        if self.dim_3d == 3:
+            points = points.reshape((-1, 3))
+            points = np.c_[points, np.ones(points.shape[0])]
+        
+        else:
+            points = points.reshape((-1, 4))
+        
         points_xyz = points[:, :3]
+
         if self.split != "test":
             labels_file = self.dataset_dir / seq / "labels" / f"{sweep}.label"
             labels = np.fromfile(labels_file.as_posix(), dtype=np.int32)
@@ -100,7 +108,7 @@ class SemanticKitti(torch.utils.data.Dataset):
             labels = np.vectorize(learning_map.get)(labels)
         else:
             labels = np.zeros((points.shape[0],))
-
+        
         points_refl = points[:, 3]
         (depth_image, refl_image, py, px) = do_range_projection(points_xyz, points_refl)
 
