@@ -73,11 +73,12 @@ def _transorm_test(depth, refl, labels, py, px):
 
 
 class SemanticKitti(torch.utils.data.Dataset):
-    def __init__(self, dataset_dir: Path, split: str,) -> None:
+    def __init__(self dim_3d=4, dataset_dir: Path, split: str,) -> None:
         self.split = split
         self.seqs = splits[split]
         self.dataset_dir = dataset_dir
         self.sweeps = []
+        self.dim_3d = dim_3d
 
         for seq in self.seqs:
             seq_str = f"{seq:0>2}"
@@ -89,7 +90,7 @@ class SemanticKitti(torch.utils.data.Dataset):
         seq, sweep = self.sweeps[index]
         sweep_file = self.dataset_dir / seq / "velodyne" / f"{sweep}.bin"
         points = np.fromfile(sweep_file.as_posix(), dtype=np.float32)
-        points = points.reshape((-1, 4))
+        points = points.reshape((-1, dim_3d))
         points_xyz = points[:, :3]
         if self.split != "test":
             labels_file = self.dataset_dir / seq / "labels" / f"{sweep}.label"

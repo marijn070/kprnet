@@ -11,6 +11,7 @@ from datasets.semantic_kitti import (
     map_inv,
     splits,
 )
+
 from utils.evaluation import Eval
 from models import deeplab
 
@@ -19,6 +20,7 @@ parser.add_argument("--checkpoint-path", required=True, type=Path)
 parser.add_argument("--output-path", required=True, type=Path)
 parser.add_argument("--semantic-kitti-dir", required=True, type=Path)
 parser.add_argument("--split", default="val", type=str)
+parser.add_argument("--dim_3d", default=4, type=int)
 
 args = parser.parse_args()
 
@@ -27,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
 
-    dataset = SemanticKitti(args.semantic_kitti_dir, args.split,)
+    dataset = SemanticKitti(dim_3d = args.dim_3d, args.semantic_kitti_dir, args.split,)
     loader = torch.utils.data.DataLoader(
         dataset=dataset, batch_size=1, shuffle=False, num_workers=4, drop_last=False,
     )
