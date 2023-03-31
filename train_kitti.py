@@ -110,6 +110,7 @@ def train(rank):
     )
     n_iter = 0
     for epoch in range(120):
+        print("starting epoch ", epoch)
         model.train()
         for step, items in enumerate(train_loader):
             images = items["image"].cuda(rank, non_blocking=True)

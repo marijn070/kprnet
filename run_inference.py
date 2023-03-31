@@ -1,5 +1,7 @@
 import argparse
 from pathlib import Path
+import warnings
+warnings.filterwarnings("ignore")
 
 import numpy as np
 import torch
