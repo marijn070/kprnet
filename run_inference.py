@@ -31,7 +31,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main():
-    if semantic_ittik_dir is not None:
+    if semantic_ittik_dir:
         dataset = SemanticITTIK(args.semantic_ittik_dir, args.semantic_ittik_dir, args.split)
     else: 
         dataset = SemanticKitti(args.semantic_kitti_dir, args.split)
