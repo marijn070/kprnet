@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from datasets.semantic_kitti import (
     SemanticKitti,
+    SemanticITTIK,
     class_names,
     map_inv,
     splits,
@@ -21,8 +22,8 @@ parser = argparse.ArgumentParser("Run lidar bug inference")
 parser.add_argument("--checkpoint-path", required=True, type=Path)
 parser.add_argument("--output-path", required=True, type=Path)
 parser.add_argument("--semantic-kitti-dir", required=True, type=Path)
+parser.add_argument("--semantic-ittik-dir", required=False, type=Path)
 parser.add_argument("--split", default="val", type=str)
-parser.add_argument("--dim_3d", default=4, type=int)
 
 args = parser.parse_args()
 
@@ -30,8 +31,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main():
+    if semantic_ittik_dir is not None:
+        dataset = SemanticITTIK(args.semantic_ittik_dir, args.semantic_ittik_dir, args.split)
+    else: 
+        dataset = SemanticKitti(args.semantic_kitti_dir, args.split)
 
-    dataset = SemanticKitti(args.semantic_kitti_dir, args.split, args.dim_3d)
     loader = torch.utils.data.DataLoader(
         dataset=dataset, batch_size=1, shuffle=False, num_workers=4, drop_last=False,
     )
