@@ -270,8 +270,8 @@ def do_range_projection_ittik(
     depth_image = np.zeros((H, W))
     refl_image = np.zeros((H, W))
 
-    proj_range[py, px] = 1.0 / depth
-    proj_refl[py, px] = reflectivity
+    depth_image[py, px] = 1.0 / depth
+    refl_image[py, px] = reflectivity
 
     return depth_image, refl_image, py, px, H, W
 
