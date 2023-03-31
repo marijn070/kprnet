@@ -304,11 +304,15 @@ def do_range_projection(
 
     proj_x = np.floor(proj_x).astype(np.int32)
     proj_y = np.floor(proj_y).astype(np.int32)
+    print("x projection array shape: ", proj_x.shape, "x projection array shape:"  proj_y.shape)
 
     # order in decreasing depth
     order = np.argsort(depth)[::-1]
+    print("depth before order: ", depth.shape)
 
     depth = depth[order]
+    print("depth after order: ", depth.shape)
+
     reflectivity = reflectivity[order]
     proj_y = proj_y[order]
     proj_x = proj_x[order]
