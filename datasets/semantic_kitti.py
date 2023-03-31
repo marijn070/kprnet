@@ -252,12 +252,16 @@ def label_img_to_color(img, cmap):
 
     return img_color
 
+
+
 def do_range_projection_ittik(
         points: np.ndarray, reflectivity: np.ndarray, ittik_range: np.ndarray
 ):
     # get the location in the range image of each point
     px = ittik_range[:, 0]     
     py = ittik_range[:, 1]
+
+    print(f"px: {px.shape} py: {py.shape}, shapes match {px.shape == py.shape}")
     
     # get the overall dimensions of the range image
     H = int(np.max(py) + 1)
@@ -265,6 +269,8 @@ def do_range_projection_ittik(
 
     # get the depth of each point
     depth = np.linalg.norm(points, 2, axis=1)
+
+    print(f"depth: {depth.shape}, px: {px.shape}, shapes match {depth.shape == px.shape}")
 
     # create the range image
     depth_image = np.zeros((H, W))
@@ -304,7 +310,7 @@ def do_range_projection(
 
     proj_x = np.floor(proj_x).astype(np.int32)
     proj_y = np.floor(proj_y).astype(np.int32)
-    print("x projection array shape: ", proj_x.shape, "x projection array shape:",  proj_y.shape)
+    print("x projection array shape: ", proj_x.shape, "y projection array shape:",  proj_y.shape)
 
     # order in decreasing depth
     order = np.argsort(depth)[::-1]
