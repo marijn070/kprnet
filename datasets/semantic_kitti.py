@@ -73,7 +73,6 @@ def _transorm_test(depth, refl, labels, py, px, H=65.0, W=2049.0):
 
 class SemanticITTIK(torch.utils.data.Dataset):
     def __init__(self, dataset_dir: Path, ittik_dir: Path, split: str) -> None:
-        print("hi")
         self.split = split
         self.seqs = splits[split]
         self.dataset_dir = dataset_dir
@@ -91,17 +90,9 @@ class SemanticITTIK(torch.utils.data.Dataset):
         seq, sweep = self.sweeps[index]
         sweep_file = self.dataset_dir / seq / "velodyne" / f"{sweep}.bin"
         ittik_file = self.ittik_dir / seq / "velodyne" / f"{sweep}.bin"
-        
-        print("ittik file is: ", ittik_file)
-        print("sweep file is: ", sweep_file)
-
         points = np.fromfile(sweep_file.as_posix(), dtype=np.float32)
         ittik_proj = np.fromfile(ittik_file.as_posix(), dtype=np.uint16).reshape((-1, 2))
-
-        print("ittik points shape: ", ittik_proj.shape)
-
         points = points.reshape((-1, 4))
-        print("points shape: ", points.shape)
         
         points_xyz = points[:, :3]
 
@@ -267,7 +258,7 @@ def do_range_projection_ittik(
     px = ittik_range[:, 0]     
     py = ittik_range[:, 1]
 
-    print(f"px: {px.shape} py: {py.shape}, shapes match {px.shape == py.shape}")
+    # print(f"px: {px.shape} py: {py.shape}, shapes match {px.shape == py.shape}")
     
     # get the overall dimensions of the range image
     H = int(np.max(py) + 1)
@@ -276,7 +267,7 @@ def do_range_projection_ittik(
     # get the depth of each point
     depth = np.linalg.norm(points, 2, axis=1)
 
-    print(f"depth: {depth.shape}, px: {px.shape}, shapes match {depth.shape == px.shape}")
+    # print(f"depth: {depth.shape}, px: {px.shape}, shapes match {depth.shape == px.shape}")
 
     # create the range image
     depth_image = np.zeros((H, W))
@@ -316,14 +307,11 @@ def do_range_projection(
 
     proj_x = np.floor(proj_x).astype(np.int32)
     proj_y = np.floor(proj_y).astype(np.int32)
-    print("x projection array shape: ", proj_x.shape, "y projection array shape:",  proj_y.shape)
 
     # order in decreasing depth
     order = np.argsort(depth)[::-1]
-    print("depth before order: ", depth.shape)
 
     depth = depth[order]
-    print("depth after order: ", depth.shape)
 
     reflectivity = reflectivity[order]
     proj_y = proj_y[order]
