@@ -74,6 +74,7 @@ def _transorm_test(depth, refl, labels, py, px):
 
 class SemanticKitti(torch.utils.data.Dataset):
     def __init__(self, dataset_dir: Path, split: str, dim_3d=4) -> None:
+        print("hi")
         self.split = split
         self.seqs = splits[split]
         self.dataset_dir = dataset_dir
@@ -213,6 +214,8 @@ def do_range_projection(
     proj_reflectivity[proj_y, proj_x] = reflectivity
 
     return (proj_range, proj_reflectivity, py, px)
+
+
 
 
 learning_map = {
