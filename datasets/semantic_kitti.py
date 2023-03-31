@@ -82,7 +82,8 @@ class SemanticITTIK(torch.utils.data.Dataset):
 
         for seq in self.seqs:
             seq_str = f"{seq:0>2}"
-            seq_path = dataset_dir / seq_str / "velodyne"
+            # seq_path = dataset_dir / seq_str / "velodyne"
+            seq_path = ittik_dir / seq_str / "velodyne"
             for sweep in seq_path.iterdir():
                 self.sweeps.append((seq_str, sweep.stem))
 
