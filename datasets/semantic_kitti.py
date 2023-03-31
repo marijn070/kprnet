@@ -72,6 +72,9 @@ def _transorm_test(depth, refl, labels, py, px):
     return depth, refl, labels, py, px
 
 
+"""
+this is the Semantic Kitti dataset loader class
+"""
 class SemanticKitti(torch.utils.data.Dataset):
     def __init__(self, dataset_dir: Path, split: str, dim_3d=4) -> None:
         self.split = split
@@ -157,6 +160,107 @@ class SemanticKitti(torch.utils.data.Dataset):
         return len(self.sweeps)
 
 
+
+"""
+this is the Semantic ITTIK dataset loader class.  It uses the range projections available from the ITTIK dataset
+"""
+class SemanticITTIK(torch.utils.data.Dataset):
+    def __init__(self, dataset_dir: Path, split: str, dim_3d=4) -> None:
+        self.split = split
+        self.seqs = splits[split]
+        self.dataset_dir = dataset_dir
+        self.sweeps = []
+        self.dim_3d = dim_3d
+
+        for seq in self.seqs:
+            seq_str = f"{seq:0>2}"
+            seq_path = dataset_dir / seq_str / "velodyne"
+            for sweep in seq_path.iterdir():
+                self.sweeps.append((seq_str, sweep.stem))
+
+    def __getitem__(self, index):
+        seq, sweep = self.sweeps[index]
+        sweep_file = self.dataset_dir / seq / "velodyne" / f"{sweep}.bin"
+        points = np.fromfile(sweep_file.as_posix(), dtype=np.float32)
+        
+        if self.dim_3d == 3:
+            points = points.reshape((-1, 3))
+            points = np.c_[points, np.ones(points.shape[0])]
+        
+        else:
+            points = points.reshape((-1, 4))
+        
+        points_xyz = points[:, :3]
+
+        if self.split != "test":
+            labels_file = self.dataset_dir / seq / "labels" / f"{sweep}.label"
+            labels = np.fromfile(labels_file.as_posix(), dtype=np.int32)
+            labels = labels.reshape((-1))
+            labels &= 0xFFFF
+            labels = np.vectorize(learning_map.get)(labels)
+        else:
+            labels = np.zeros((points.shape[0],))
+        
+        points_refl = points[:, 3]
+        (depth_image, refl_image, py, px) = do_range_projection(points_xyz, points_refl)
+
+        if self.split == "train":
+            depth_image, refl_image, labels, py, px, points_xyz = _transorm_train(
+                depth_image, refl_image, labels, py, px, points_xyz
+            )
+        else:
+            depth_image, refl_image, labels, py, px = _transorm_test(
+                depth_image, refl_image, labels, py, px
+            )
+
+        tree = kdtree(points_xyz)
+        _, knns = tree.query(points_xyz, k=7)
+
+        if points_xyz.shape[0] < px.shape[0]:
+            pad_len = px.shape[0] - points_xyz.shape[0]
+            points_xyz = np.vstack([points_xyz, np.zeros((pad_len, 3))])
+            knns = np.vstack([knns, np.zeros((pad_len, 7))])
+
+        # normalize values to be between -10 and 10
+        depth_image = 25 * (depth_image - 0.4)
+        refl_image = 20 * (refl_image - 0.5)
+        image = np.stack([depth_image, refl_image]).astype(np.float32)
+
+        px = px[np.newaxis, :]
+        py = py[np.newaxis, :]
+        labels = labels[np.newaxis, :]
+
+        res = {
+            "image": image,
+            "labels": labels,
+            "px": px,
+            "py": py,
+            "points_xyz": points_xyz,
+            "knns": knns,
+        }
+
+        if self.split in ["test", "val"]:
+            res["seq"] = seq
+            res["sweep"] = sweep
+
+        return res
+
+    def __len__(self):
+        return len(self.sweeps)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def label_img_to_color(img, cmap):
     img_height, img_width = img.shape
 
@@ -213,6 +317,14 @@ def do_range_projection(
     proj_reflectivity[proj_y, proj_x] = reflectivity
 
     return (proj_range, proj_reflectivity, py, px)
+
+def do_range_projction_ittik:(
+    points: np.ndarray, reflectivity: np.ndarray, W: int = 2049, H: int = 65,
+    ):
+    # get depth of all points
+    depth = np.linalg.norm(points, 2, axis=1)
+    
+
 
 
 learning_map = {
