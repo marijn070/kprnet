@@ -94,8 +94,10 @@ class SemanticITTIK(torch.utils.data.Dataset):
         points = np.fromfile(sweep_file.as_posix(), dtype=np.float32)
         ittik_proj = np.fromfile(ittik_file.as_posix(), dtype=np.uint16).reshape((-1, 2))
 
-        
+        print("ittik points shape: ", ittik_proj.shape)
+
         points = points.reshape((-1, 4))
+        print("points shape: ", points.shape)
         
         points_xyz = points[:, :3]
 
