@@ -200,3 +200,10 @@ def resnext101_aspp_kp(num_classes):
     )
     classifier = DeepLabHead(2048, num_classes)
     return DeepLabKP(backbone, classifier)
+
+def resnext101_aspp(num_classes):
+    backbone = resnet.resnext101_32x16d_wsl(
+        pretrained=False, replace_stride_with_dilation=[False, False, True]
+    )
+    classifier = DeepLabHead(2048, num_classes)
+    return DeepLab(backbone, classifier)
