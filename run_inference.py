@@ -24,7 +24,7 @@ parser.add_argument("--output-path", required=True, type=Path)
 parser.add_argument("--semantic-kitti-dir", required=True, type=Path)
 parser.add_argument("--semantic-ittik-dir", required=False, type=Path)
 parser.add_argument("--split", default="val", type=str)
-parser.add_argument("--KP", required=False, default=True, type=bool)
+parser.add_argument("--KP", action='store_true')
 
 args = parser.parse_args()
 
@@ -46,10 +46,12 @@ def main():
 
     # if we are using KPConv, the whole pretrained model is used
     if args.KP:
+        print("Runnning with KPConv")
         model = deeplab.resnext101_aspp_kp(19)
         model.to(device)
         model.load_state_dict(torch.load(args.checkpoint_path))
     else:
+        print("Runnning without KPConv")
         model = deeplab.resnext101_aspp(19)
         model.to(device)
         model.load_state_dict(torch.load(args.checkpoint_path), strict=False)
@@ -64,10 +66,17 @@ def main():
             px = items["px"].float().to(device)
             pxyz = items["points_xyz"].float().to(device)
             knns = items["knns"].long().to(device)
-            predictions = model(images, px, py, pxyz, knns)
+
+            if args.KP:
+                predictions = model(images, px, py, pxyz, knns)
+            else:
+                predictions = model(images, px)
+
             _, predictions_argmax = torch.max(predictions, 1)
             predictions_points = predictions_argmax.cpu().numpy()
+            print(f"Number of None points in predictions = {np.sum(predictions_points == None)}")
             eval_metric.update(predictions_points, labels)
+            print(f"Number of None points in predictions = {np.sum(predictions_points == None)}")
             predictions_points = np.vectorize(map_inv.get)(predictions_points).astype(
                 np.uint32
             )

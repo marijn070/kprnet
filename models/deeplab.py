@@ -6,20 +6,25 @@ from torch.nn import functional as F
 
 from . import resnet
 from .kpconv.blocks import KPConv
-
+# from utils.knn import KNN
 
 class DeepLab(nn.Module):
     def __init__(self, backbone, classifier):
         super(DeepLab, self).__init__()
         self.backbone = backbone
         self.classifier = classifier
+        #self.knn = KNN(19)
+        #self.final = nn.Conv2d(256,19,1)
 
-    def forward(self, x):
-
+    def forward(self, x, px):
         input_shape = x.shape[-2:]
+        #input_shape = px.shape[-2:]
+        print(input_shape)
         x = self.backbone(x)
         x = self.classifier(x)
         x = F.interpolate(x, size=input_shape, mode="bilinear", align_corners=False)
+        #x = self.final(x)
+
 
         return x
 
@@ -33,11 +38,14 @@ class DeepLabKP(nn.Module):
         self.final = nn.Conv2d(256, 19, 1)
 
     def forward(self, x, px, py, pxyz, pknn):
-
+        print(x.shape)
         x = self.backbone(x)
         x = self.classifier(x)
         x = self.kpclassifier(x, px, py, pxyz, pknn)
+        print("KP output:", x.shape)
+        print(f"px: {px.shape}, py = {py.shape}")
         x = self.final(x)
+
         return x
 
 
@@ -100,8 +108,11 @@ class DeepLabHead(nn.Module):
             nn.BatchNorm2d(256),
             nn.ReLU(),
         )
+        
         self.dropout = nn.Dropout(0.2)
-        # self.final = nn.Conv2d(256, num_classes, 1)
+
+        ## THIS was uncommented!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        #self.final = nn.Conv2d(256, num_classes, 1)
 
     def forward(self, x):
         lv1, lv2, lv3 = x
