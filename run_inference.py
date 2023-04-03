@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 import warnings
-warnings.filterwarnings("ignore")
+warnings.simplefilter("ignore")
 
 import numpy as np
 import torch
@@ -24,6 +24,7 @@ parser.add_argument("--output-path", required=True, type=Path)
 parser.add_argument("--semantic-kitti-dir", required=True, type=Path)
 parser.add_argument("--semantic-ittik-dir", required=False, type=Path)
 parser.add_argument("--split", default="val", type=str)
+parser.add_argument("--KP", required=False, default=True, type=bool)
 
 args = parser.parse_args()
 
@@ -42,10 +43,17 @@ def main():
     for seq in splits[args.split]:
         seq_dir = args.output_path / "sequences" / f"{seq:0>2}" / "predictions"
         seq_dir.mkdir(parents=True, exist_ok=True)
-    model = deeplab.resnext101_aspp_kp(19)
-    model.to(device)
-    model.load_state_dict(torch.load(args.checkpoint_path))
-    print("Runnign validation")
+
+    # if we are using KPConv, the whole pretrained model is used
+    if args.KP:
+        model = deeplab.resnext101_aspp_kp(19)
+        model.to(device)
+        model.load_state_dict(torch.load(args.checkpoint_path))
+    else:
+        model = deeplab.resnext101_aspp(19)
+        model.to(device)
+        model.load_state_dict(torch.load(args.checkpoint_path), strict=False)
+
     model.eval()
     eval_metric = Eval(19, 255)
     with torch.no_grad():
