@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 import warnings
-warnings.filterwarnings("ignore")
+warnings.simplefilter("ignore")
 
 import numpy as np
 import torch
