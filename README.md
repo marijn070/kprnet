@@ -44,7 +44,9 @@ The fully trained model weights can be downloaded [here](https://drive.google.co
 # Reproduction Documentation
 
 # KPRNet: Improving projection-based LiDAR semantic segmentation
-Group 61  - Marijn De Rijk, Jakob Bichler, Christian Reinprecht
+Group 61  - Marijn De Rijk 4888871 m.f.derijk@student.tudelft.nl --> **Code Variant**
+Jakob Bichler 5856795 j.d.bichler@student.tudelft.nl --> **New dataset**
+Christian Reinprecht 5836239 - c.t.reinprecht@student.tudelft.nl --> **Reproduction**
 
 
 ## Introduction
